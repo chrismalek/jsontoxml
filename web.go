@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/clbanning/mxj/j2x"
 	"github.com/clbanning/mxj/x2j"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 func json2Xml(rw http.ResponseWriter, req *http.Request) {
@@ -72,9 +74,23 @@ func xml2Json(rw http.ResponseWriter, req *http.Request) {
 
 }
 
+func rootHandler(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintln(res, "This page intentionally left blank")
+}
+
 func main() {
 	http.HandleFunc("/json2xml", json2Xml)
 	http.HandleFunc("/xml2json", xml2Json)
 
-	log.Fatal(http.ListenAndServe(":8082", nil))
+	http.HandleFunc("/", rootHandler)
+
+	var portNumber string = os.Getenv("PORT")
+
+	if portNumber == "" {
+		portNumber = "9000"
+	}
+
+	fmt.Println("listening on port:" + portNumber)
+	log.Fatal(http.ListenAndServe(":"+portNumber, nil))
+
 }
