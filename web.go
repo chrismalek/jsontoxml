@@ -36,6 +36,7 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 			log.Println(string(xmloutput))
 
 			if err != nil {
+				log.Println(err)
 				http.Error(rw, "Could not convert to xml", 400)
 			}
 
