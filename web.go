@@ -2,14 +2,23 @@ package main
 
 import (
 	"fmt"
-	"github.com/clbanning/mxj/j2x"
-	"github.com/clbanning/mxj/x2j"
+	"github.com/clbanning/mxj"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 )
+
+func setResponseHeaders(rw http.ResponseWriter) {
+
+	rw.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+	rw.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+	rw.Header().Set("Expires", "0")                                         // Proxies
+	rw.Header().Set("Content-Type", "application/xml")
+
+}
 
 func json2Xml(rw http.ResponseWriter, req *http.Request) {
 
@@ -20,28 +29,41 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 		case "application/json":
 			body, err := ioutil.ReadAll(req.Body)
 
+			match, _ := regexp.MatchString(`\B\[`, string(body))
+			if match {
+				body = []byte(`{"top-level-array":` + string(body) + `}`)
+				log.Println("\n----\n matched top-level-array\n")
+				log.Println("new Body \n", string(body))
+			}
 			// log.Println(string(body))
 
-			if err != nil {
-				panic(err)
+			mapVal, merr := mxj.NewMapJson(body)
+			if merr != nil {
+				http.Error(rw, "Error converting reading JSON", 406)
+				return
 			}
-			var xmloutput []byte
+			xmlVal, xerr := mapVal.Xml()
+			if xerr != nil {
+				http.Error(rw, "Error converting to XML", 406)
+				return
+			}
 
-			xmloutput, err = j2x.JsonToXml(body)
+			// xmloutput, err = j2x.JsonToXml(body)
 
-			//log.Println(string(xmloutput))
+			// log.Println(string(xmlVal))
 
 			if err != nil {
 				log.Println(err)
 				http.Error(rw, "Could not convert to xml", 400)
+				return
 			}
+			setResponseHeaders(rw)
+			// rw.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
+			// rw.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
+			// rw.Header().Set("Expires", "0")                                         // Proxies
+			// rw.Header().Set("Content-Type", "application/xml")
 
-			rw.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
-			rw.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
-			rw.Header().Set("Expires", "0")                                         // Proxies
-			rw.Header().Set("Content-Type", "application/xml")
-
-			rw.Write(xmloutput)
+			rw.Write(xmlVal)
 
 		default:
 			http.Error(rw, "Please send along the content-type header of application/json", 406)
@@ -63,28 +85,37 @@ func xml2Json(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method == "POST" {
+		switch req.Header.Get("Content-Type") {
+		case "application/xml":
 
-		// log.Println(string(body))
+			// log.Println(string(body))
 
-		if err != nil {
-			panic(err)
+			// var jsonoutput []byte
+
+			// jsonoutput, err = x2j.XmlToJson(body)
+
+			// log.Println(string(jsonoutput))
+
+			mapVal, merr := mxj.NewMapXml(body)
+			if merr != nil {
+				http.Error(rw, "Error Reading XML", 406)
+				return
+			}
+			jVal, jerr := mapVal.Json()
+			if jerr != nil {
+				http.Error(rw, "Error converting to JSON", 406) // handle error
+				return
+			}
+
+			setResponseHeaders(rw)
+
+			rw.Write(jVal)
+
+		default:
+			http.Error(rw, "Please send along the content-type header of application/xml", 406)
+
 		}
-		var jsonoutput []byte
 
-		jsonoutput, err = x2j.XmlToJson(body)
-
-		// log.Println(string(jsonoutput))
-
-		if err != nil {
-			panic(err)
-		}
-
-		rw.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
-		rw.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
-		rw.Header().Set("Expires", "0")                                         // Proxies
-		rw.Header().Set("Content-Type", "application/json")
-
-		rw.Write(jsonoutput)
 	} else {
 		http.Error(rw, "Invalid request method.", 405)
 	}
