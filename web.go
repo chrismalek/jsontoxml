@@ -29,7 +29,7 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 		case "application/json":
 			body, err := ioutil.ReadAll(req.Body)
 
-			match, _ := regexp.MatchString(`\B\[`, string(body))
+			match, _ := regexp.MatchString(`^\[`, string(body))
 			if match {
 				body = []byte(`{"top-level-array":` + string(body) + `}`)
 				log.Println("\n----\n matched top-level-array\n")
