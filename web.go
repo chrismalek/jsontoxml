@@ -127,7 +127,8 @@ func rootHandler(res http.ResponseWriter, req *http.Request) {
 	err := tmpl.Execute(res, nil)
 
 	if err != nil {
-		panic(err)
+		http.Error(res, "Internal server error", 500)
+		return
 	}
 
 	// fmt.Fprintln(res, "This page intentionally left blank")
@@ -137,7 +138,6 @@ func main() {
 
 	http.HandleFunc("/json2xml", json2Xml)
 	http.HandleFunc("/xml2json", xml2Json)
-
 	http.HandleFunc("/", rootHandler)
 
 	var portNumber string = os.Getenv("PORT")
