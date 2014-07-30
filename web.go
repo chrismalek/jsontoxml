@@ -20,11 +20,7 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 		case "application/json":
 			body, err := ioutil.ReadAll(req.Body)
 
-			if err != nil {
-				panic(err)
-			}
-
-			log.Println(string(body))
+			// log.Println(string(body))
 
 			if err != nil {
 				panic(err)
@@ -33,7 +29,7 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 
 			xmloutput, err = j2x.JsonToXml(body)
 
-			log.Println(string(xmloutput))
+			//log.Println(string(xmloutput))
 
 			if err != nil {
 				log.Println(err)
@@ -46,6 +42,7 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 			rw.Header().Set("Content-Type", "application/xml")
 
 			rw.Write(xmloutput)
+
 		default:
 			http.Error(rw, "Please send along the content-type header of application/json", 406)
 
