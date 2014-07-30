@@ -40,6 +40,8 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 			mapVal, merr := mxj.NewMapJson(body)
 			if merr != nil {
 				http.Error(rw, "Error converting reading JSON", 406)
+				log.Println("invalid json \n", string(body))
+
 				return
 			}
 			xmlVal, xerr := mapVal.Xml()
@@ -48,20 +50,12 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			// xmloutput, err = j2x.JsonToXml(body)
-
-			// log.Println(string(xmlVal))
-
 			if err != nil {
 				log.Println(err)
 				http.Error(rw, "Could not convert to xml", 400)
 				return
 			}
 			setResponseHeaders(rw)
-			// rw.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate") // HTTP 1.1.
-			// rw.Header().Set("Pragma", "no-cache")                                   // HTTP 1.0.
-			// rw.Header().Set("Expires", "0")                                         // Proxies
-			// rw.Header().Set("Content-Type", "application/xml")
 
 			rw.Write(xmlVal)
 
@@ -88,17 +82,11 @@ func xml2Json(rw http.ResponseWriter, req *http.Request) {
 		switch req.Header.Get("Content-Type") {
 		case "application/xml":
 
-			// log.Println(string(body))
-
-			// var jsonoutput []byte
-
-			// jsonoutput, err = x2j.XmlToJson(body)
-
-			// log.Println(string(jsonoutput))
-
 			mapVal, merr := mxj.NewMapXml(body)
 			if merr != nil {
 				http.Error(rw, "Error Reading XML", 406)
+				log.Println("invalid xml \n", string(body))
+
 				return
 			}
 			jVal, jerr := mapVal.Json()
@@ -131,7 +119,6 @@ func RootHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// fmt.Fprintln(res, "This page intentionally left blank")
 }
 
 func main() {

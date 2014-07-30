@@ -68,9 +68,6 @@ func TestJson2xmlTestCases(t *testing.T) {
 			t.Errorf("Response body did not contain expected %v:\n\t %v", body, test.out)
 		}
 
-		// actual := Translate(test.in)
-		// assert.Equal(t, test.out, actual)
 	}
 
-	// t.Errorf("failed dude")
 }
