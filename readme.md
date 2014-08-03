@@ -1,4 +1,4 @@
-h1. JSON to XML
+# JSON to XML
 
 This is a simple go web application that uses @github.com/clbanning/mxj@ and @github.com/clbanning/anyxml@ package to convert JSON to XML and visa versa.
 
@@ -7,6 +7,6 @@ I created this because I was working with some web services in PeopleSoft and th
 Special thanks to @clbanning for both of his libraries and help.
 
 
-h2. Issue List
+## Issue List
 
 * needs some more test cases around XML output
