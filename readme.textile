@@ -1,15 +1,12 @@
 h1. JSON to XML
 
-This is a simple go web application that uses https://github.com/clbanning/mxj package to convert JSON to XML and visa versa.
+This is a simple go web application that uses @github.com/clbanning/mxj@ and @github.com/clbanning/anyxml@ package to convert JSON to XML and visa versa.
 
 I created this because I was working with some web services in PeopleSoft and the JSON support was terrible. Peoplesoft could generate valid JSON but it was having problems parsing.  I figured I could get the JSON from the web service. Then invoke this service to get XML back which could then more easily be parsed by PeoplelSoft.
+
+Special thanks to @clbanning for both of his libraries and help.
 
 
 h2. Issue List
 
-* If you send in an array it fails.  For example
-<pre>
-[{"somekey":"somevalue"},
-{"somekey":"somevalue"},
-{"somekey":"somevalue"}]
-</pre>
+* needs some more test cases around XML output
