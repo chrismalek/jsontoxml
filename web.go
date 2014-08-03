@@ -1,14 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/clbanning/anyxml"
 	"github.com/clbanning/mxj"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 )
 
 func setResponseHeaders(rw http.ResponseWriter) {
@@ -27,37 +28,28 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 	case "POST":
 		switch req.Header.Get("Content-Type") {
 		case "application/json":
-			body, err := ioutil.ReadAll(req.Body)
+			body, _ := ioutil.ReadAll(req.Body)
 
-			match, _ := regexp.MatchString(`^\[`, string(body))
-			if match {
-				body = []byte(`{"top-level-array":` + string(body) + `}`)
-				log.Println("\n----\n matched top-level-array\n")
-				log.Println("new Body \n", string(body))
-			}
-			// log.Println(string(body))
+			var parsedJson interface{}
 
-			mapVal, merr := mxj.NewMapJson(body)
-			if merr != nil {
+			if err := json.Unmarshal(body, &parsedJson); err != nil {
 				http.Error(rw, "Error converting reading JSON", 406)
-				log.Println("invalid json \n", string(body))
-
+				log.Println("invalid JSON found \n", string(body))
 				return
 			}
-			xmlVal, xerr := mapVal.Xml()
-			if xerr != nil {
+
+			var xmlout []byte
+
+			xmlout, err2 := anyxml.Xml(parsedJson, "root")
+
+			if err2 != nil {
 				http.Error(rw, "Error converting to XML", 406)
 				return
 			}
 
-			if err != nil {
-				log.Println(err)
-				http.Error(rw, "Could not convert to xml", 400)
-				return
-			}
 			setResponseHeaders(rw)
 
-			rw.Write(xmlVal)
+			rw.Write(xmlout)
 
 		default:
 			http.Error(rw, "Please send along the content-type header of application/json", 406)
