@@ -112,27 +112,12 @@ func RootHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func TestFormPost(res http.ResponseWriter, req *http.Request) {
-	var tmpl = template.Must(template.ParseFiles("templates/about.html"))
-	err := tmpl.Execute(res, nil)
-
-	if err != nil {
-		http.Error(res, "Internal server error", 500)
-		return
-	}
-	req.ParseForm()
-	for parameterName := range req.Form {
-		log.Println("Form Post \n param: %s - value : %", parameterName, r.FormValue(parameterName))
-	}
-
-}
-
 func main() {
 
 	http.HandleFunc("/json2xml", json2Xml)
 	http.HandleFunc("/xml2json", xml2Json)
 	http.HandleFunc("/", RootHandler)
-	http.Handle("/testform", TestFormPost)
+
 	var portNumber string = os.Getenv("PORT")
 
 	if portNumber == "" {
