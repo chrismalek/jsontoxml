@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"github.com/clbanning/anyxml"
 	"github.com/clbanning/mxj"
@@ -30,6 +31,8 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 		case "application/json":
 			body, _ := ioutil.ReadAll(req.Body)
 
+			log.Println(req.Header.Get("x-dbname"))
+			log.Println(string(body))
 			var parsedJson interface{}
 
 			if err := json.Unmarshal(body, &parsedJson); err != nil {
@@ -41,14 +44,14 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 			var xmlout []byte
 
 			xmlout, err2 := anyxml.Xml(parsedJson, "root")
-
 			if err2 != nil {
 				http.Error(rw, "Error converting to XML", 406)
 				return
 			}
 
 			setResponseHeaders(rw)
-
+			log.Println("sending output")
+			rw.Write([]byte(xml.Header)) // Interesting on heroku this is not getting through
 			rw.Write(xmlout)
 
 		default:
