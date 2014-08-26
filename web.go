@@ -32,7 +32,6 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 			body, _ := ioutil.ReadAll(req.Body)
 
 			log.Println(req.Header.Get("x-dbname"))
-			log.Println(string(body))
 			var parsedJson interface{}
 
 			if err := json.Unmarshal(body, &parsedJson); err != nil {
@@ -50,9 +49,9 @@ func json2Xml(rw http.ResponseWriter, req *http.Request) {
 			}
 
 			setResponseHeaders(rw)
-			log.Println("sending output")
-			rw.Write([]byte(xml.Header)) // Interesting on heroku this is not getting through
-			rw.Write(xmlout)
+			output := []byte(xml.Header)
+			output = append(output, xmlout...)
+			rw.Write(output)
 
 		default:
 			http.Error(rw, "Please send along the content-type header of application/json", 406)
